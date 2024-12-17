@@ -219,6 +219,7 @@ def main():
     stone2 = Stone()
     stone3 = Stone()
     poison = Poison()
+    stones = (stone1.position, stone2.position, stone3.position)
     while True:
 
         clock.tick(SPEED)
@@ -235,12 +236,10 @@ def main():
         if snake.get_head_position() in snake.positions[1:]:
             snake.reset()
 
-        if snake.get_head_position() == stone1.position:
+        if snake.get_head_position() in stones:
             snake.reset()
-        if snake.get_head_position() == stone2.position:
-            snake.reset()
-        if snake.get_head_position() == stone3.position:
-            snake.reset()
+        if apple.position in stones:
+            apple.randomize_position()
         if snake.get_head_position() == poison.position:
             poison.randomize_position()
             if snake.length != 1:
