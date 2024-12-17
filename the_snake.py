@@ -2,79 +2,98 @@ from random import randint
 
 import pygame
 
-# Константы для размеров поля и сетки:
+
 SCREEN_WIDTH, SCREEN_HEIGHT = 640, 480
 GRID_SIZE = 20
 GRID_WIDTH = SCREEN_WIDTH // GRID_SIZE
 GRID_HEIGHT = SCREEN_HEIGHT // GRID_SIZE
 
-# Направления движения:
+
 UP = (0, -1)
 DOWN = (0, 1)
 LEFT = (-1, 0)
 RIGHT = (1, 0)
 
-# Цвет фона - черный:
+
 BOARD_BACKGROUND_COLOR = (0, 0, 0)
 
-# Цвет границы ячейки
+
 BORDER_COLOR = (93, 216, 228)
 
-# Цвет яблока
+
 APPLE_COLOR = (255, 0, 0)
 
-# Цвет змейки
+
 SNAKE_COLOR = (0, 255, 0)
 
 STONE_COLOR = (158, 158, 158)
-# Скорость движения змейки:
+
+POISON_COLOR = (139, 69, 19)
+
 SPEED = 20
 
-# Настройка игрового окна:
+
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
 
-# Заголовок окна игрового поля:
+
 pygame.display.set_caption('Змейка')
 
-# Настройка времени:
+
 clock = pygame.time.Clock()
 
 
 class GameObject:
     """Создание класса GameObject"""
 
-    body_color = None
-
     def draw(self):
         """Создание виртуального метода,появляющегося у каждого наследника"""
-        pass
+        raise NotImplementedError
 
     def __init__(self):
+        self.body_color = None
         self.position = ((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2))
 
 
 class Stone(GameObject):
     """Создание класса Камень"""
 
-    body_color = STONE_COLOR
-
-    def draw(self):
+    def draw_cell(self):
         """Метод для отображения камня"""
         rect = pygame.Rect(self.position, (GRID_SIZE, GRID_SIZE))
         pygame.draw.rect(screen, self.body_color, rect)
         pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
 
     def __init__(self):
+        self.body_color = STONE_COLOR
         self.position = (
             randint(0, GRID_WIDTH - 1) * GRID_SIZE,
             randint(0, GRID_HEIGHT - 1) * GRID_SIZE
         )
 
 
+class Poison(GameObject):
+    """Создание класса Неправильная еда"""
+
+    def __init__(self):
+        self.body_color = POISON_COLOR
+        self.randomize_position()
+
+    def randomize_position(self):
+        """Метод для измнения позиции яда"""
+        self.position = (
+            randint(0, GRID_WIDTH - 1) * GRID_SIZE,
+            randint(0, GRID_HEIGHT - 1) * GRID_SIZE
+        )
+
+    def draw_cell(self):
+        """Метод для отображения яда"""
+        rect = pygame.Rect(self.position, (GRID_SIZE, GRID_SIZE))
+        pygame.draw.rect(screen, self.body_color, rect)
+        pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
+
+
 class Apple(GameObject):
     """Создание класса Яблоко"""
-
-    body_color = APPLE_COLOR
 
     def draw(self):
         """Метод для отображения яблока"""
@@ -83,10 +102,8 @@ class Apple(GameObject):
         pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
 
     def __init__(self):
-        self.position = (
-            randint(0, GRID_WIDTH - 1) * GRID_SIZE,
-            randint(0, GRID_HEIGHT - 1) * GRID_SIZE
-        )
+        self.body_color = APPLE_COLOR
+        self.randomize_position()
 
     def randomize_position(self):
         """Метод для измнения позиции яблока"""
@@ -99,15 +116,12 @@ class Apple(GameObject):
 class Snake(GameObject):
     """Создание класса Змейка"""
 
-    length = 1
-    positions = []
-    direction = UP
-    next_direction = None
-    body_color = SNAKE_COLOR
-
     def __init__(self):
-        super().__init__()
-        self.positions.append(self.position)
+        self.direction = UP
+        self.next_direction = None
+        self.body_color = SNAKE_COLOR
+        self.positions = []
+        self.reset()
 
     def draw(self):
         """Метод для отображения змейки"""
@@ -135,23 +149,23 @@ class Snake(GameObject):
         self.update_direction()
         if self.direction == RIGHT:
             new_position = (
-                self.positions[0][0] + GRID_SIZE,
-                self.positions[0][1]
+                self.get_head_position()[0] + GRID_SIZE,
+                self.get_head_position()[1]
             )
         elif self.direction == LEFT:
             new_position = (
-                self.positions[0][0] - GRID_SIZE,
-                self.positions[0][1]
+                self.get_head_position()[0] - GRID_SIZE,
+                self.get_head_position()[1]
             )
         elif self.direction == UP:
             new_position = (
-                self.positions[0][0],
-                self.positions[0][1] - GRID_SIZE
+                self.get_head_position()[0],
+                self.get_head_position()[1] - GRID_SIZE
             )
         elif self.direction == DOWN:
             new_position = (
-                self.positions[0][0],
-                self.positions[0][1] + GRID_SIZE
+                self.get_head_position()[0],
+                self.get_head_position()[1] + GRID_SIZE
             )
 
         if self.positions:
@@ -198,14 +212,13 @@ def handle_keys(game_object):
 
 def main():
     """Функция, создающая необходимые объекты для запуска игры"""
-    # Инициализация PyGame:
     pygame.init()
-    # Тут нужно создать экземпляры классов.
     apple = Apple()
     snake = Snake()
     stone1 = Stone()
     stone2 = Stone()
     stone3 = Stone()
+    poison = Poison()
     while True:
 
         clock.tick(SPEED)
@@ -214,6 +227,9 @@ def main():
 
         if apple.position == snake.get_head_position():
             apple.randomize_position()
+            poison.randomize_position()
+            if apple.position in snake.positions:
+                apple.randomize_position()
             snake.length += 1
 
         if snake.get_head_position() in snake.positions[1:]:
@@ -225,12 +241,21 @@ def main():
             snake.reset()
         if snake.get_head_position() == stone3.position:
             snake.reset()
+        if snake.get_head_position() == poison.position:
+            poison.randomize_position()
+            if snake.length != 1:
+                snake.length -= 1
+                snake.positions.pop()
+            else:
+                snake.reset()
+
         screen.fill(BOARD_BACKGROUND_COLOR)
         snake.draw()
         apple.draw()
-        stone1.draw()
-        stone2.draw()
-        stone3.draw()
+        poison.draw_cell()
+        stone1.draw_cell()
+        stone2.draw_cell()
+        stone3.draw_cell()
         pygame.display.update()
 
 
