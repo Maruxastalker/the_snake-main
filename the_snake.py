@@ -51,7 +51,9 @@ class GameObject:
 
     def draw_cell(self):
         """Создание виртуального метода,появляющегося у каждого наследника"""
-        raise NotImplementedError
+        rect = pygame.Rect(self.position, (GRID_SIZE, GRID_SIZE))
+        pygame.draw.rect(screen, self.body_color, rect)
+        pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
 
     def randomize_position(self):
         """Создание виртуального метода,появляющегося у каждого наследника"""
@@ -64,12 +66,6 @@ class GameObject:
 
 class Stone(GameObject):
     """Создание класса Камень"""
-
-    def draw_cell(self):
-        """Метод для отображения камня"""
-        rect = pygame.Rect(self.position, (GRID_SIZE, GRID_SIZE))
-        pygame.draw.rect(screen, self.body_color, rect)
-        pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
 
     def __init__(self):
         self.body_color = STONE_COLOR
@@ -92,12 +88,6 @@ class Poison(GameObject):
             randint(0, GRID_WIDTH - 1) * GRID_SIZE,
             randint(0, GRID_HEIGHT - 1) * GRID_SIZE
         )
-
-    def draw_cell(self):
-        """Метод для отображения яда"""
-        rect = pygame.Rect(self.position, (GRID_SIZE, GRID_SIZE))
-        pygame.draw.rect(screen, self.body_color, rect)
-        pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
 
 
 class Apple(GameObject):
