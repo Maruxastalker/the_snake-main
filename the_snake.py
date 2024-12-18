@@ -49,6 +49,14 @@ class GameObject:
         """Создание виртуального метода,появляющегося у каждого наследника"""
         raise NotImplementedError
 
+    def draw_cell(self):
+        """Создание виртуального метода,появляющегося у каждого наследника"""
+        raise NotImplementedError
+
+    def randomize_position(self):
+        """Создание виртуального метода,появляющегося у каждого наследника"""
+        raise NotImplementedError
+
     def __init__(self):
         self.body_color = None
         self.position = ((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2))
@@ -147,27 +155,24 @@ class Snake(GameObject):
     def move(self):
         """Метод для движения змейки"""
         self.update_direction()
+        x, y = self.get_head_position()
         if self.direction == RIGHT:
-            new_position = (
-                self.get_head_position()[0] + GRID_SIZE,
-                self.get_head_position()[1]
-            )
+            direction_x = 1
+            direction_y = 0
         elif self.direction == LEFT:
-            new_position = (
-                self.get_head_position()[0] - GRID_SIZE,
-                self.get_head_position()[1]
-            )
+            direction_x = -1
+            direction_y = 0
         elif self.direction == UP:
-            new_position = (
-                self.get_head_position()[0],
-                self.get_head_position()[1] - GRID_SIZE
-            )
+            direction_x = 0
+            direction_y = -1
         elif self.direction == DOWN:
-            new_position = (
-                self.get_head_position()[0],
-                self.get_head_position()[1] + GRID_SIZE
-            )
+            direction_x = 0
+            direction_y = 1
 
+        new_position = (
+            (x + (direction_x * GRID_SIZE)) % SCREEN_WIDTH,
+            (y + (direction_y * GRID_SIZE)) % SCREEN_HEIGHT
+        )
         if self.positions:
             self.last = self.positions[-1]
 
@@ -175,11 +180,6 @@ class Snake(GameObject):
 
         if self.length < len(self.positions[1:]):
             self.positions.pop()
-
-        if new_position[0] < 0 or new_position[0] >= SCREEN_WIDTH:
-            self.reset()
-        elif new_position[1] < 0 or new_position[1] >= SCREEN_HEIGHT:
-            self.reset()
 
     def get_head_position(self):
         """Метод для возвращения головы змейки"""
@@ -229,7 +229,7 @@ def main():
         if apple.position == snake.get_head_position():
             apple.randomize_position()
             poison.randomize_position()
-            if apple.position in snake.positions:
+            while apple.position in snake.positions:
                 apple.randomize_position()
             snake.length += 1
 
