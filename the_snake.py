@@ -57,7 +57,10 @@ class GameObject:
 
     def randomize_position(self):
         """Создание виртуального метода,появляющегося у каждого наследника"""
-        raise NotImplementedError
+        self.position = (
+            randint(0, GRID_WIDTH - 1) * GRID_SIZE,
+            randint(0, GRID_HEIGHT - 1) * GRID_SIZE
+        )
 
     def __init__(self):
         self.body_color = None
@@ -82,33 +85,17 @@ class Poison(GameObject):
         self.body_color = POISON_COLOR
         self.randomize_position()
 
-    def randomize_position(self):
-        """Метод для измнения позиции яда"""
-        self.position = (
-            randint(0, GRID_WIDTH - 1) * GRID_SIZE,
-            randint(0, GRID_HEIGHT - 1) * GRID_SIZE
-        )
-
 
 class Apple(GameObject):
     """Создание класса Яблоко"""
 
     def draw(self):
         """Метод для отображения яблока"""
-        rect = pygame.Rect(self.position, (GRID_SIZE, GRID_SIZE))
-        pygame.draw.rect(screen, self.body_color, rect)
-        pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
+        self.draw_cell()
 
     def __init__(self):
         self.body_color = APPLE_COLOR
         self.randomize_position()
-
-    def randomize_position(self):
-        """Метод для измнения позиции яблока"""
-        self.position = (
-            randint(0, GRID_WIDTH - 1) * GRID_SIZE,
-            randint(0, GRID_HEIGHT - 1) * GRID_SIZE
-        )
 
 
 class Snake(GameObject):
