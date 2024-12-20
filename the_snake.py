@@ -72,10 +72,7 @@ class Stone(GameObject):
 
     def __init__(self):
         self.body_color = STONE_COLOR
-        self.position = (
-            randint(0, GRID_WIDTH - 1) * GRID_SIZE,
-            randint(0, GRID_HEIGHT - 1) * GRID_SIZE
-        )
+        self.randomize_position()
 
 
 class Poison(GameObject):
@@ -111,13 +108,11 @@ class Snake(GameObject):
     def draw(self):
         """Метод для отображения змейки"""
         for position in self.positions[:-1]:
-            rect = (pygame.Rect(position, (GRID_SIZE, GRID_SIZE)))
-            pygame.draw.rect(screen, self.body_color, rect)
-            pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
+            self.position = position
+            self.draw_cell()
 
-        head_rect = pygame.Rect(self.positions[0], (GRID_SIZE, GRID_SIZE))
-        pygame.draw.rect(screen, self.body_color, head_rect)
-        pygame.draw.rect(screen, BORDER_COLOR, head_rect, 1)
+        self.position = self.positions[0]
+        self.draw_cell()
 
         if self.last:
             last_rect = pygame.Rect(self.last, (GRID_SIZE, GRID_SIZE))
