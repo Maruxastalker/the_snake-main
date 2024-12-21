@@ -1,44 +1,26 @@
 from random import randint
-
 import pygame
-
 
 SCREEN_WIDTH, SCREEN_HEIGHT = 640, 480
 GRID_SIZE = 20
 GRID_WIDTH = SCREEN_WIDTH // GRID_SIZE
 GRID_HEIGHT = SCREEN_HEIGHT // GRID_SIZE
 
-
 UP = (0, -1)
 DOWN = (0, 1)
 LEFT = (-1, 0)
 RIGHT = (1, 0)
 
-
 BOARD_BACKGROUND_COLOR = (0, 0, 0)
-
-
 BORDER_COLOR = (93, 216, 228)
-
-
 APPLE_COLOR = (255, 0, 0)
-
-
 SNAKE_COLOR = (0, 255, 0)
-
 STONE_COLOR = (158, 158, 158)
-
 POISON_COLOR = (139, 69, 19)
-
 SPEED = 20
 
-
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
-
-
 pygame.display.set_caption('Змейка')
-
-
 clock = pygame.time.Clock()
 
 
@@ -49,9 +31,9 @@ class GameObject:
         """Создание виртуального метода,появляющегося у каждого наследника"""
         raise NotImplementedError
 
-    def draw_cell(self):
+    def draw_cell(self, position):
         """Создание виртуального метода,появляющегося у каждого наследника"""
-        rect = pygame.Rect(self.position, (GRID_SIZE, GRID_SIZE))
+        rect = pygame.Rect(position, (GRID_SIZE, GRID_SIZE))
         pygame.draw.rect(screen, self.body_color, rect)
         pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
 
@@ -88,7 +70,7 @@ class Apple(GameObject):
 
     def draw(self):
         """Метод для отображения яблока"""
-        self.draw_cell()
+        self.draw_cell(self.position)
 
     def __init__(self):
         self.body_color = APPLE_COLOR
@@ -108,11 +90,9 @@ class Snake(GameObject):
     def draw(self):
         """Метод для отображения змейки"""
         for position in self.positions[:-1]:
-            self.position = position
-            self.draw_cell()
+            self.draw_cell(position)  # Pass the position as an argument
 
-        self.position = self.positions[0]
-        self.draw_cell()
+        self.draw_cell(self.positions[0])  # Draw the head of the snake
 
         if self.last:
             last_rect = pygame.Rect(self.last, (GRID_SIZE, GRID_SIZE))
@@ -192,8 +172,8 @@ def main():
     stone3 = Stone()
     poison = Poison()
     stones = (stone1.position, stone2.position, stone3.position)
-    while True:
 
+    while True:
         clock.tick(SPEED)
         handle_keys(snake)
         snake.move()
@@ -223,10 +203,10 @@ def main():
         screen.fill(BOARD_BACKGROUND_COLOR)
         snake.draw()
         apple.draw()
-        poison.draw_cell()
-        stone1.draw_cell()
-        stone2.draw_cell()
-        stone3.draw_cell()
+        poison.draw_cell(poison.position)  # Pass the position as an argument
+        stone1.draw_cell(stone1.position)  # Pass the position as an argument
+        stone2.draw_cell(stone2.position)  # Pass the position as an argument
+        stone3.draw_cell(stone3.position)  # Pass the position as an argument
         pygame.display.update()
 
 
